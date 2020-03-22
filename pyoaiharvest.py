@@ -1,5 +1,5 @@
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import zlib
 import time
 import re
@@ -17,20 +17,20 @@ def getFile(serverString, command, verbose=1, sleepTime=0):
         time.sleep(sleepTime)
     remoteAddr = serverString + '?verb=%s' % command
     if verbose:
-        print "\r", "getFile ...'%s'" % remoteAddr[-90:]
+        print("\r", "getFile ...'%s'" % remoteAddr[-90:])
     headers = {'User-Agent': 'OAIHarvester/2.0', 'Accept': 'text/html',
                'Accept-Encoding': 'compress, deflate'}
     try:
         #remoteData=urllib2.urlopen(urllib2.Request(remoteAddr, None, headers)).read()
-        remoteData = urllib2.urlopen(remoteAddr).read()
-    except urllib2.HTTPError, exValue:
+        remoteData = urllib.request.urlopen(remoteAddr).read()
+    except urllib.error.HTTPError as exValue:
         if exValue.code == 503:
             retryWait = int(exValue.hdrs.get("Retry-After", "-1"))
             if retryWait < 0:
                 return None
-            print 'Waiting %d seconds' % retryWait
+            print('Waiting %d seconds' % retryWait)
             return getFile(serverString, command, 0, retryWait)
-        print exValue
+        print(exValue)
         if nRecoveries < maxRecoveries:
             nRecoveries += 1
             return getFile(serverString, command, 1, 60)
@@ -43,7 +43,7 @@ def getFile(serverString, command, verbose=1, sleepTime=0):
     nDataBytes += len(remoteData)
     mo = re.search('<error *code=\"([^"]*)">(.*)</error>', remoteData)
     if mo:
-        print "OAIERROR: code=%s '%s'" % (mo.group(1), mo.group(2))
+        print("OAIERROR: code=%s '%s'" % (mo.group(1), mo.group(2)))
     else:
         return remoteData
 
@@ -79,12 +79,12 @@ if __name__ == "__main__":
         if options.setName:
             oaiSet = options.setName
     else:
-        print usage
+        print(usage)
 
     if not serverString.startswith('http'):
         serverString = 'http://' + serverString
 
-    print "Writing records to %s from archive %s" % (outFileName, serverString)
+    print("Writing records to %s from archive %s" % (outFileName, serverString))
 
     ofile = codecs.lookup('utf-8')[-1](file(outFileName, 'wb'))
 
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     else:
         verbOpts += '&metadataPrefix=%s' % 'oai_dc'
 
-    print "Using url:%s" % serverString + '?ListRecords' + verbOpts
+    print("Using url:%s" % serverString + '?ListRecords' + verbOpts)
 
     data = getFile(serverString, 'ListRecords' + verbOpts)
 
@@ -123,6 +123,6 @@ if __name__ == "__main__":
 
     ofile.write('\n</repository>\n'), ofile.close()
 
-    print "\nRead %d bytes (%.2f compression)" % (nDataBytes, float(nDataBytes) / nRawBytes)
+    print("\nRead %d bytes (%.2f compression)" % (nDataBytes, float(nDataBytes) / nRawBytes))
 
-    print "Wrote out %d records" % recordCount
+    print("Wrote out %d records" % recordCount)
