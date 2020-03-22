@@ -22,7 +22,7 @@ def getFile(serverString, command, verbose=1, sleepTime=0):
                'Accept-Encoding': 'compress, deflate'}
     try:
         #remoteData=urllib2.urlopen(urllib2.Request(remoteAddr, None, headers)).read()
-        remoteData = urllib.request.urlopen(remoteAddr).read()
+        remoteData = urllib.request.urlopen(remoteAddr).read().decode('utf-8')
     except urllib.error.HTTPError as exValue:
         if exValue.code == 503:
             retryWait = int(exValue.hdrs.get("Retry-After", "-1"))
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     print("Writing records to %s from archive %s" % (outFileName, serverString))
 
-    ofile = codecs.lookup('utf-8')[-1](file(outFileName, 'wb'))
+    ofile = codecs.lookup('utf-8')[-1](open(outFileName, 'wb'))
 
     ofile.write('<repository xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" \
      xmlns:dc="http://purl.org/dc/elements/1.1/" \
