@@ -21,7 +21,6 @@ def getFile(serverString, command, verbose=1, sleepTime=0):
     headers = {'User-Agent': 'OAIHarvester/2.0', 'Accept': 'text/html',
                'Accept-Encoding': 'compress, deflate'}
     try:
-        #remoteData=urllib2.urlopen(urllib2.Request(remoteAddr, None, headers)).read()
         remoteData = urllib.request.urlopen(remoteAddr).read().decode('utf-8')
     except urllib.error.HTTPError as exValue:
         if exValue.code == 503:
